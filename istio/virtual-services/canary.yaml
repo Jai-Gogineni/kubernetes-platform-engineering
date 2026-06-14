@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: platform-service-canary
+spec:
+  hosts: ["platform-service"]
+  http:
+    - route:
+        - destination:
+            host: platform-service
+            subset: stable
+          weight: 90
+        - destination:
+            host: platform-service
+            subset: canary
+          weight: 10
+      retries:
+        attempts: 3
+        perTryTimeout: 5s

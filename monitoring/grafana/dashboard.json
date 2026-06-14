@@ -1,0 +1,10 @@
+{
+  "dashboard": {
+    "title": "Platform Service Health",
+    "panels": [
+      { "title": "Request Rate", "type": "graph", "targets": [{"expr": "rate(http_requests_total{service=\"platform-service\"}[5m])"}] },
+      { "title": "Error Rate", "type": "stat", "targets": [{"expr": "rate(http_requests_total{status=~\"5..\"}[5m]) / rate(http_requests_total[5m]) * 100"}] },
+      { "title": "P99 Latency", "type": "graph", "targets": [{"expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))"}] }
+    ]
+  }
+}

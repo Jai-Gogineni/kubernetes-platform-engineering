@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: platform-alerts
+spec:
+  groups:
+    - name: platform.rules
+      rules:
+        - alert: HighErrorRate
+          expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+          for: 5m
+          labels: { severity: critical }
+          annotations: { summary: "Error rate above 5% for {{ $labels.service }}" }
+        - alert: HighLatency
+          expr: histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m])) > 2
+          for: 5m
+          labels: { severity: warning }
+          annotations: { summary: "P99 latency above 2s for {{ $labels.service }}" }

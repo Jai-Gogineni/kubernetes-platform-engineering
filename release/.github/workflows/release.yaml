@@ -1,0 +1,23 @@
+name: Release Pipeline
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build & Push Image
+        run: |
+          docker build -t gcr.io/$PROJECT_ID/platform-service:${{ github.ref_name }} .
+          docker push gcr.io/$PROJECT_ID/platform-service:${{ github.ref_name }}
+      - name: Update K8s Manifests
+        run: |
+          cd kubernetes/overlays/prod
+          kustomize edit set image platform-service=gcr.io/$PROJECT_ID/platform-service:${{ github.ref_name }}
+      - name: Commit & Push (triggers Argo CD sync)
+        run: |
+          git config user.name "release-bot"
+          git commit -am "release: ${{ github.ref_name }}"
+          git push
